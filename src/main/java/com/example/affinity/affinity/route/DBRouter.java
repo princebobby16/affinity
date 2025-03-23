@@ -38,51 +38,82 @@ public class DBRouter extends RouteBuilder {
         // billable hours
         from("direct:save-billable-hours")
                 .log("Received CSV file upload request")
-                .log("body ${body}")
-                .convertBodyTo(byte[].class)
-                .process(exchange -> {
-                    // Generate a unique file ID (you can use UUID)
-                    String filename = exchange.getIn().getHeader(Exchange.FILE_NAME, String.class);
-                    System.out.println(filename);
-                    if (filename == null) {
-                        filename = "timesheet-" + LocalDateTime.now() + ".csv";
-                    }
-                    System.out.println(filename);
-                    // Set Minio required headers
-                    exchange.getIn().setHeader(MinioConstants.OBJECT_NAME, filename);
-                })
-                .to("minio://{{env:AFFINITY_MINIO_BILLABLE_HOURS_BUCKET}}?accessKey={{env:AFFINITY_MINIO_USERNAME}}&secretKey={{env:AFFINITY_MINIO_PASSWORD}}&endpoint={{env:AFFINITY_MINIO_HOST}}:{{env:AFFINITY_MINIO_PORT}}")
-                .log("file successfully stored in minio")
-                .log("sending file to rabbitmq")
-                .process(exchange -> {
-                    String fileName = exchange.getIn().getHeader("CamelMinioObjectName", String.class);
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    exchange.getIn().setBody(objectMapper.writeValueAsString(Helpers.setFileName(fileName)));
-                })
-                .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON_VALUE))
-                .log("JSON payload to send: ${body}")
-                .to("spring-rabbitmq:{{env:AFFINITY_RABBITMQ_EXCHANGE}}?queues={{env:AFFINITY_RABBITMQ_QUEUE}}&routingKey=file&disableReplyTo=true")
-                .log("file name successfully stored in rabbitmq")
-                .process(exchange -> {
-                    StandardResponse response = StandardResponse.builder()
-                            .data(Data.builder()
-                                    .id(0L)
-                                    .message("file uploaded successfully")
-                                    .build()
-                            )
-                            .meta(Meta.builder()
-                                    .status("SUCCESS")
-                                    .timestamp(new Timestamp(System.currentTimeMillis()))
-                                    .traceId("")
-                                    .build()
-                            )
-                            .build();
+                .log("${headers}")
+                .choice()
+                .when(header(Exchange.CONTENT_TYPE).isEqualTo("text/csv"))
+                    .process(exchange -> {
+                        String contentLength = exchange.getIn().getHeader("Content-Length", String.class);
+                        if (contentLength != null && Integer.parseInt(contentLength) > 10 * 1024 * 1024) {
+                            throw new RuntimeException("Payload too large!");
+                        }
+                    })
+                    .log("file received")
+                    .convertBodyTo(byte[].class)
+                    .process(exchange -> {
+                        // Generate a unique file ID (you can use UUID)
+                        String filename = exchange.getIn().getHeader(Exchange.FILE_NAME, String.class);
+                        System.out.println(filename);
+                        if (filename == null) {
+                            filename = "timesheet-" + LocalDateTime.now() + ".csv";
+                        }
+                        System.out.println(filename);
+                        // Set Minio required headers
+                        exchange.getIn().setHeader(MinioConstants.OBJECT_NAME, filename);
+                    })
+                    .to("minio://{{env:AFFINITY_MINIO_BILLABLE_HOURS_BUCKET}}?accessKey={{env:AFFINITY_MINIO_USERNAME}}&secretKey={{env:AFFINITY_MINIO_PASSWORD}}&endpoint={{env:AFFINITY_MINIO_HOST}}:{{env:AFFINITY_MINIO_PORT}}")
+                    .log("file successfully stored in minio")
+                    .log("sending file to rabbitmq")
+                    .process(exchange -> {
+                        String fileName = exchange.getIn().getHeader("CamelMinioObjectName", String.class);
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        exchange.getIn().setBody(objectMapper.writeValueAsString(Helpers.setFileName(fileName)));
+                    })
+                    .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON_VALUE))
+                    .log("JSON payload to send: ${body}")
+                    .to("spring-rabbitmq:{{env:AFFINITY_RABBITMQ_EXCHANGE}}?queues={{env:AFFINITY_RABBITMQ_QUEUE}}&routingKey=file&disableReplyTo=true")
+                    .log("file name successfully stored in rabbitmq")
+                    .process(exchange -> {
+                        StandardResponse response = StandardResponse.builder()
+                                .data(Data.builder()
+                                        .id(0L)
+                                        .message("file uploaded successfully")
+                                        .build()
+                                )
+                                .meta(Meta.builder()
+                                        .status("SUCCESS")
+                                        .timestamp(new Timestamp(System.currentTimeMillis()))
+                                        .traceId("")
+                                        .build()
+                                )
+                                .build();
 
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    exchange.getIn().setBody(objectMapper.writeValueAsString(response));
-                })
-                .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(201))
-                .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON_VALUE));
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        exchange.getIn().setBody(objectMapper.writeValueAsString(response));
+                    })
+                    .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(201))
+                    .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON_VALUE))
+                .otherwise()
+                    .process(exchange -> {
+                        StandardResponse response = StandardResponse.builder()
+                                .data(Data.builder()
+                                        .id(0L)
+                                        .message("invalid file type")
+                                        .build()
+                                )
+                                .meta(Meta.builder()
+                                        .status("SUCCESS")
+                                        .timestamp(new Timestamp(System.currentTimeMillis()))
+                                        .traceId("")
+                                        .build()
+                                )
+                                .build();
+
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        exchange.getIn().setBody(objectMapper.writeValueAsString(response));
+                    })
+                    .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(400))
+                    .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON_VALUE))
+        ;
 
         // employees
         from("direct:save-employee")
