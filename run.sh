@@ -19,6 +19,5 @@ export AFFINITY_MINIO_USERNAME=minioadmin
 export AFFINITY_MINIO_PASSWORD=minioadmin
 export AFFINITY_MINIO_INVOICE_BUCKET=invoices
 export AFFINITY_MINIO_BILLABLE_HOURS_BUCKET=billable-hours
-export AFFINITY_HOME_DIR=/home/prince/personal/affinity
 
 ./gradlew bootRun
