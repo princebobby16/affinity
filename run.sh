@@ -1,4 +1,4 @@
-export AFFINITY_PORT=9999
+export AFFINITY_PORT=8081
 export AFFINITY_HOME_DIR=/home/prince/personal/affinity
 export ENVIRONMENT=local
 
