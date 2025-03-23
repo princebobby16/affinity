@@ -39,7 +39,7 @@ public class FileProcessor extends RouteBuilder {
                 .process(exchange -> currentFileName = exchange.getIn().getHeader(MinioConstants.OBJECT_NAME, String.class))
                 .log("file name received");
 
-        from("minio://{{env:AFFINITY_MINIO_BILLABLE_HOURS_BUCKET}}?accessKey={{env:AFFINITY_MINIO_USERNAME}}&secretKey={{env:AFFINITY_MINIO_PASSWORD}}&endpoint={{env:AFFINITY_MINIO_HOST}}:{{env:AFFINITY_MINIO_PORT}}&deleteAfterRead=true&objectName="+ currentFileName)
+        from("minio://{{env:AFFINITY_MINIO_BILLABLE_HOURS_BUCKET}}?accessKey={{env:AFFINITY_MINIO_USERNAME}}&secretKey={{env:AFFINITY_MINIO_PASSWORD}}&endpoint={{env:AFFINITY_MINIO_HOST}}:{{env:AFFINITY_MINIO_PORT}}&moveAfterRead=true&destinationBucketName=billables&objectName="+ currentFileName)
                 .process(exchange -> currentFileName = "")
                 .log("${body}")
                 .setBody().method(Helpers.class, "parseCSV(${body})")
