@@ -40,7 +40,7 @@ public class RestRouter extends RouteBuilder {
                     exchange.getIn().setBody(objectMapper.writeValueAsString(response));
 
                 })
-                .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(400))
+                .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(500))
                 .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON_VALUE));
 
 
@@ -93,11 +93,6 @@ public class RestRouter extends RouteBuilder {
                 .get("/invoices/company/{companyId}")
                 .produces(MediaType.APPLICATION_JSON_VALUE)
                 .to("direct:get-company-invoices")
-
-                .get("/invoice-file/company/{companyId}")
-                .produces(MediaType.MULTIPART_FORM_DATA_VALUE)
-                .to("direct:get-company-invoice-file")
-
 
                 .get("/invoices/employee/{employeeId}")
                 .produces(MediaType.APPLICATION_JSON_VALUE)

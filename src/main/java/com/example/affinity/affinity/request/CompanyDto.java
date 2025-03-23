@@ -16,5 +16,4 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class CompanyDto implements Serializable {
     String name;
-    String email;
 }

@@ -10,12 +10,9 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.minio.MinioConstants;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.usermodel.Color;
-import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
 
-import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;

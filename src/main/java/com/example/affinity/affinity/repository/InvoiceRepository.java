@@ -1,7 +1,6 @@
 package com.example.affinity.affinity.repository;
 
 import com.example.affinity.affinity.model.Invoice;
-import jakarta.persistence.Tuple;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

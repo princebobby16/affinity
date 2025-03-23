@@ -1,14 +1,12 @@
 package com.example.affinity.affinity.request;
 
 import com.example.affinity.affinity.model.Invoice;
-import com.example.affinity.affinity.service.InvoiceService;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 import java.io.Serializable;
 import java.sql.Date;
-import java.text.SimpleDateFormat;
 
 /**
  * DTO for {@link Invoice}

@@ -1,0 +1,335 @@
+openapi: 3.0.0
+info:
+  title: Affinity API
+  description: OpenAPI documentation for the Affinity API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8081
+    description: Local Development Server
+paths:
+  /employees:
+    get:
+      tags:
+        - Employee
+      summary: Get all employees
+      operationId: getEmployees
+      responses:
+        '200':
+          description: A list of employees
+          content:
+            application/json:
+              example:
+                data:
+                  - id: 1
+                    fullName: Prince Bobby
+                    email: princebobby506@gmail.com
+                    createdAt: 1742490939900
+                    updatedAt: 1742493672592
+                  - id: 3
+                    fullName: Kofi Bobby
+                    email: kofi@gmail.com
+                    createdAt: 1742493729404
+                    updatedAt: 1742493729404
+                meta:
+                  traceId: ''
+                  timestamp: 1742493752814
+                  status: SUCCESS
+                
+    post:
+      tags:
+        - Employee
+      summary: Create a new employee or updates an already existing one
+      operationId: createOrUpdateEmployee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullName:
+                  type: string
+                  example: "Prince Bobby"
+                email:
+                  type: string
+                  example: "example@gmail.com"
+      responses:
+        '201':
+          description: Employee created
+          content:
+            application/json:
+              example:
+                data:
+                  id: 9
+                  message: employee saved successfully
+                meta:
+                  traceId: ''
+                  timestamp: 1742505328641
+                  status: SUCCESS
+                
+  /employees/{id}:
+    get:
+      tags:
+        - Employee
+      summary: Get employee by ID
+      operationId: getEmployeeById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Employee details
+          content:
+            application/json:
+              example:
+                data:
+                  id: 3
+                  fullName: Kofi Bobby
+                  email: kofi@gmail.com
+                  createdAt: 1742493729404
+                  updatedAt: 1742493729404
+                meta:
+                  traceId: ''
+                  timestamp: 1742493743166
+                  status: SUCCESS
+                
+  /companies:
+    get:
+      tags:
+        - Company
+      summary: Get all companies
+      operationId: getCompanies
+      responses:
+        '200':
+          description: A list of companies
+          content:
+            application/json:
+              example:
+                data:
+                  id: 1
+                  message: employee saved successfully
+                meta:
+                  traceId: ''
+                  timestamp: 1742495240682
+                  status: SUCCESS
+    post:
+      tags:
+        - Company
+      summary: Create a new company or update if already exists
+      operationId: createOrUpdateCompany
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Google"
+      responses:
+        '201':
+          description: Company created
+          content:
+            application/json:
+              example:
+                data:
+                  id: 1
+                  message: employee saved successfully
+                meta:
+                  traceId: ''
+                  timestamp: 1742495240682
+                  status: SUCCESS
+                
+  /companies/{id}:
+    get:
+      tags:
+        - Company
+      summary: Get company by ID
+      operationId: getCompanyById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Company details
+          content:
+            application/json:
+              example:
+                data:
+                  id: 1
+                  name: Google
+                  createdAt: 1742494252620
+                  updatedAt: 1742494252620
+                meta:
+                  traceId: ''
+                  timestamp: 1742494884609
+                  status: SUCCESS
+                
+  /invoices/company/{companyId}:
+    get:
+      tags:
+        - Invoice
+      summary: Get invoices for a company
+      operationId: getCompanyInvoices
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Company invoices
+          content:
+            application/json:
+              example:
+                data:
+                  - id: 4
+                    companyName: TikTok
+                    employeeId: 2
+                    noOfHours: 1.5
+                    unitPrice: 100
+                    cost: 150
+                    workDay: 1741651200000
+                    createdAt: 1742507539815
+                    updatedAt: 1742507539815
+                  - id: 10
+                    companyName: TikTok
+                    employeeId: 2
+                    noOfHours: 1.5
+                    unitPrice: 100
+                    cost: 150
+                    workDay: 1741651200000
+                    createdAt: 1742508349317
+                    updatedAt: 1742508349317
+                meta:
+                  traceId: ''
+                  timestamp: 1742549500222
+                  status: SUCCESS
+                
+  # /invoice-file/company/{companyId}:
+  #   get:
+  #     tags:
+  #       - Invoice
+  #     summary: Get invoice file for a company
+  #     operationId: getCompanyInvoiceFile
+  #     parameters:
+  #       - name: companyId
+  #         in: path
+  #         required: true
+  #         schema:
+  #           type: string
+  #       - name: month
+  #         in: header
+  #         required: true
+  #         schema:
+  #           type: string
+  #       - name: year
+  #         in: header
+  #         required: true
+  #         schema:
+  #           type: string
+  #     responses:
+  #       '200':
+  #         description: Invoice file
+  #         content:
+  #           application/json:
+  #             example:
+                
+
+  /invoices/employee/{employeeId}:
+    get:
+      tags:
+        - Invoice
+      summary: Get invoices for an employee
+      operationId: getEmployeeInvoices
+      parameters:
+        - name: employeeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Employee invoices
+          content:
+            application/json:
+              example:
+                data:
+                  - id: 4
+                    companyName: TikTok
+                    employeeId: 2
+                    noOfHours: 1.5
+                    unitPrice: 100
+                    cost: 150
+                    workDay: 1741651200000
+                    createdAt: 1742507539815
+                    updatedAt: 1742507539815
+                  - id: 10
+                    companyName: TikTok
+                    employeeId: 2
+                    noOfHours: 1.5
+                    unitPrice: 100
+                    cost: 150
+                    workDay: 1741651200000
+                    createdAt: 1742508349317
+                    updatedAt: 1742508349317
+                meta:
+                  traceId: ''
+                  timestamp: 1742515937027
+                  status: SUCCESS
+                
+
+  /submit-billable-hours:
+    post:
+      tags:
+        - Billable Hours
+      summary: Submit billable hours
+      operationId: submitBillableHours
+      requestBody:
+        required: true
+        content:
+          text/csv:
+            schema:
+              type: object
+              format: binary
+      responses:
+        '200':
+          description: Billable hours submitted
+          content:
+            application/json:
+              example:
+                data:
+                  id: 0
+                  message: file uploaded successfully
+                meta:
+                  traceId: ''
+                  timestamp: 1742693222314
+                  status: SUCCESS
+                
+                
+  /:
+    get:
+      tags:
+        - Health
+      summary: Health check
+      operationId: healthCheck      
+      responses:
+        '200':
+          description: Service is running
+          content:
+            application/json:
+              example:
+                environment: local
+                system: Affinity Billing API
+                version: 0.0.1
+                email: eng.admin@affinity.companies
+                status: OK
+                

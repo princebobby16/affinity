@@ -36,7 +36,6 @@ public class InvoiceService {
 
         // make sure company exists or create one
         CompanyDto companyDto = CompanyDto.builder()
-                .email("")
                 .name(dto.getCompanyName())
                 .build();
         Data data = companyService.save(companyDto).getData();
