@@ -39,7 +39,7 @@ public class DBRouter extends RouteBuilder {
                 .log("Received CSV file upload request")
                 .log("${headers}")
                 .choice()
-                .when(header(Exchange.CONTENT_TYPE).isEqualTo("text/csv"))
+                .when(header(Exchange.CONTENT_TYPE).isEqualTo("text/csv")) // ensure file is a csv file
                     .process(exchange -> {
                         String contentLength = exchange.getIn().getHeader("Content-Length", String.class);
                         if (contentLength != null && Integer.parseInt(contentLength) > 10 * 1024 * 1024) {
@@ -47,28 +47,29 @@ public class DBRouter extends RouteBuilder {
                         }
                     })
                     .log("file received")
-                    .convertBodyTo(byte[].class)
+                    .convertBodyTo(byte[].class)//convert body to list of bytes
                     .process(exchange -> {
-                        // Generate a unique file ID (you can use UUID)
-                        String filename = exchange.getIn().getHeader(Exchange.FILE_NAME, String.class);
+                        String filename = exchange.getIn().getHeader(Exchange.FILE_NAME, String.class); // attempt to get the file name from the header
                         System.out.println(filename);
                         if (filename == null) {
-                            filename = "timesheet-" + LocalDateTime.now() + ".csv";
+                            filename = "timesheet-" + LocalDateTime.now() + ".csv"; // create it if file name not found
                         }
                         System.out.println(filename);
                         // Set Minio required headers
                         exchange.getIn().setHeader(MinioConstants.OBJECT_NAME, filename);
                     })
+                    // send file to minio
                     .to("minio://{{env:AFFINITY_MINIO_BILLABLE_HOURS_BUCKET}}?accessKey={{env:AFFINITY_MINIO_USERNAME}}&secretKey={{env:AFFINITY_MINIO_PASSWORD}}&endpoint={{env:AFFINITY_MINIO_HOST}}:{{env:AFFINITY_MINIO_PORT}}")
                     .log("file successfully stored in minio")
                     .log("sending file to rabbitmq")
                     .process(exchange -> {
-                        String fileName = exchange.getIn().getHeader("CamelMinioObjectName", String.class);
+                        String fileName = exchange.getIn().getHeader("CamelMinioObjectName", String.class); // get file name from headers
                         ObjectMapper objectMapper = new ObjectMapper();
-                        exchange.getIn().setBody(objectMapper.writeValueAsString(Helpers.setFileName(fileName)));
+                        exchange.getIn().setBody(objectMapper.writeValueAsString(Helpers.setFileName(fileName))); // convert to json
                     })
                     .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON_VALUE))
                     .log("JSON payload to send: ${body}")
+                    // send file name json format to rabbitmq
                     .to("spring-rabbitmq:{{env:AFFINITY_RABBITMQ_EXCHANGE}}?queues={{env:AFFINITY_RABBITMQ_QUEUE}}&routingKey=file&disableReplyTo=true")
                     .log("file name successfully stored in rabbitmq")
                     .process(exchange -> {
@@ -90,8 +91,8 @@ public class DBRouter extends RouteBuilder {
                         exchange.getIn().setBody(objectMapper.writeValueAsString(response));
                     })
                     .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(201))
-                    .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON_VALUE))
-                .otherwise()
+                    .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON_VALUE)) // return response
+                .otherwise() // if not a csv file return appropriate response
                     .process(exchange -> {
                         StandardResponse response = StandardResponse.builder()
                                 .data(Data.builder()
