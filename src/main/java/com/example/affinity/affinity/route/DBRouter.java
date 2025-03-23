@@ -27,7 +27,6 @@ public class DBRouter extends RouteBuilder {
     @Override
     public void configure() {
 
-
         // health
         from("direct:health")
                 .log("Health check started")
@@ -44,7 +43,7 @@ public class DBRouter extends RouteBuilder {
                     .process(exchange -> {
                         String contentLength = exchange.getIn().getHeader("Content-Length", String.class);
                         if (contentLength != null && Integer.parseInt(contentLength) > 10 * 1024 * 1024) {
-                            throw new RuntimeException("Payload too large!");
+                            throw new RuntimeException("File too large!");
                         }
                     })
                     .log("file received")
