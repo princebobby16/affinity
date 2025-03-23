@@ -1,0 +1,83 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.4.3'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.example.affinity'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+springBoot {
+	mainClass = 'com.example.affinity.affinity.AffinityApplication.java'
+}
+
+dependencies {
+	implementation 'org.apache.camel.springboot:camel-servlet-starter:4.10.2'
+	implementation 'org.apache.camel.springboot:camel-spring-boot-starter:4.10.2'
+	implementation 'org.apache.camel.springboot:camel-jackson-starter:4.10.2'
+
+//	developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
+
+	// MINIO Storage bucket
+	implementation 'org.apache.camel.springboot:camel-minio-starter:4.10.2'
+	implementation 'org.apache.camel.springboot:camel-rest-starter:4.10.2'
+
+	// HTTP Requests
+	implementation 'org.apache.camel:camel-http:4.10.2'
+
+	// Rabbit MQ
+	implementation 'org.apache.camel:camel-spring-rabbitmq:4.10.2'
+
+	// CSV File Reader
+	implementation 'org.apache.camel.springboot:camel-csv-starter:4.10.2'
+
+	// Spring Boot Web (excluding Tomcat)
+	implementation('org.springframework.boot:spring-boot-starter-web') {
+		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+	}
+
+	// Spring Boot with Undertow
+	implementation 'org.springframework.boot:spring-boot-starter-undertow'
+
+	// JDBC connection
+	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+
+	// JPA
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+	// write to excel file
+	implementation 'org.apache.poi:poi-ooxml:5.2.3'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // Lombok (for reducing boilerplate code)
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	// PostgreSQL
+	runtimeOnly 'org.postgresql:postgresql'
+
+	// Spring Boot Test
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
