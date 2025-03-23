@@ -29,8 +29,27 @@ public class CompanyService {
         } else {
             company.setName(dto.getName());
         }
+        Company c = new Company();
+        try {
+            c = companyRepository.save(company);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            Data data = Data.builder()
+                    .message("failed to save company")
+                    .id(c.getId())
+                    .build();
 
-        Company c = companyRepository.save(company);
+            Meta meta = Meta.builder()
+                    .status("ERROR")
+                    .timestamp(new Timestamp(System.currentTimeMillis()))
+                    .traceId("")
+                    .build();
+
+            return StandardResponse.builder()
+                    .data(data)
+                    .meta(meta)
+                    .build();
+        }
 
         Data data = Data.builder()
                 .message("company saved successfully")
