@@ -111,8 +111,7 @@ public class DBRouter extends RouteBuilder {
                         exchange.getIn().setBody(objectMapper.writeValueAsString(response));
                     })
                     .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(400))
-                    .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON_VALUE))
-        ;
+                    .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON_VALUE));
 
         // employees
         from("direct:save-employee")
